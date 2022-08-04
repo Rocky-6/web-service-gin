@@ -50,7 +50,9 @@ func main() {
 
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
-	router.GET("/albums/:id", getAlbumByID)
+	router.GET("/albums/id/:id", getAlbumByID)
+	router.GET("/albums/title/:title", getAlbumsByTitle)
+	router.GET("/albums/artist/:artist", getAlbumsByArtist)
 	router.POST("/albums", postAlbums)
 
 	router.Run("0.0.0.0:8080")
@@ -94,6 +96,60 @@ func getAlbumByID(c *gin.Context) {
 		}
 	}
 	c.IndentedJSON(http.StatusOK, alb)
+}
+
+func getAlbumsByTitle(c *gin.Context) {
+	title := c.Param("title")
+	var albums []album
+
+	rows, err := db.Query("SELECT * FROM album WHERE title = ?", title)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var alb album
+		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+			if err == sql.ErrNoRows {
+				c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+				return
+			}
+		}
+		albums = append(albums, alb)
+	}
+	if err := rows.Err(); err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, albums)
+}
+
+func getAlbumsByArtist(c *gin.Context) {
+	artist := c.Param("artist")
+	var albums []album
+
+	rows, err := db.Query("SELECT * FROM album WHERE artist = ?", artist)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var alb album
+		if err := rows.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+			if err == sql.ErrNoRows {
+				c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+				return
+			}
+		}
+		albums = append(albums, alb)
+	}
+	if err := rows.Err(); err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, albums)
 }
 
 func postAlbums(c *gin.Context) {
