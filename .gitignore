@@ -1,2 +1,3 @@
-/kengen.sql
-/create-tables.sql
+/mysql/mysql-logs
+/mysql/mysql-store
+/mysql/test.sql

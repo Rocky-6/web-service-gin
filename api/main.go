@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
@@ -18,6 +19,41 @@ type album struct {
 	Title  string  `json:"title"`
 	Artist string  `json:"artist"`
 	Price  float32 `json:"price"`
+}
+
+func main() {
+	cfg := mysql.Config{
+		User:   os.Getenv("DBUSER"),
+		Passwd: os.Getenv("DBPASS"),
+		Net:    "tcp",
+		Addr:   "db:3306",
+		DBName: "recordings",
+	}
+
+	var err error
+	db, err = sql.Open("mysql", cfg.FormatDSN())
+	if err != nil {
+		log.Fatal(err)
+
+	}
+	var pingErr error
+	for i := 0; i < 100; i++ {
+		pingErr = db.Ping()
+		if pingErr != nil {
+			time.Sleep(time.Second * 2)
+			continue
+		}
+		break
+	}
+
+	fmt.Println("Connected!")
+
+	router := gin.Default()
+	router.GET("/albums", getAlbums)
+	router.GET("/albums/:id", getAlbumByID)
+	router.POST("/albums", postAlbums)
+
+	router.Run("0.0.0.0:8080")
 }
 
 func getAlbums(c *gin.Context) {
@@ -73,33 +109,4 @@ func postAlbums(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, alb)
-}
-
-func main() {
-	cfg := mysql.Config{
-		User:   os.Getenv("DBUSER"),
-		Passwd: os.Getenv("DBPASS"),
-		Net:    "tcp",
-		Addr:   "127.0.0.1:3306",
-		DBName: "recordings",
-	}
-
-	var err error
-	db, err = sql.Open("mysql", cfg.FormatDSN())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	pingErr := db.Ping()
-	if pingErr != nil {
-		log.Fatal(pingErr)
-	}
-	fmt.Println("Connected!")
-
-	router := gin.Default()
-	router.GET("/albums", getAlbums)
-	router.GET("/albums/:id", getAlbumByID)
-	router.POST("/albums", postAlbums)
-
-	router.Run("localhost:8080")
 }
