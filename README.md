@@ -40,8 +40,10 @@ Content-Length: 114
     "artist": "Betty Carter",
     "price": 49.99
 }
-<br>
+
 ```
+<br>
+
 Get Albums
 ```
 curl http://localhost:8080/albums
