@@ -55,7 +55,7 @@ func main() {
 	router.GET("/albums/artist/:artist", getAlbumsByArtist)
 	router.POST("/albums", postAlbums)
 
-	router.Run("0.0.0.0:8080")
+	router.Run(os.Getenv("APIADDR") + ":8080")
 }
 
 func getAlbums(c *gin.Context) {

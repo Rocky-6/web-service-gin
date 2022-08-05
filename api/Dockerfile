@@ -2,6 +2,7 @@ FROM golang:1.18
 
 ENV DBUSER user
 ENV DBPASS my-secret-pw
+ENV APIADDR 0.0.0.0
 
 WORKDIR /usr/src/api
 
